@@ -22,24 +22,30 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        cache: 'pnpm' # Use pnpm for caching
 
-    - name: Cache Node.js modules
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Cache pnpm modules
       uses: actions/cache@v4
       with:
-        path: node_modules
-        key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+        path: ~/.pnpm-store
+        key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-store-${{ runner.os }}-
 
     - name: Install dependencies
-      run: npm install
+      run: pnpm install
 
-    - name: Install webpack-cli
-      run: npm install -D webpack-cli
+    - name: Build with Nuxt
+      run: pnpm build
 
-    - name: Build
-      run: npx webpack
+    - name: Run tests (if applicable)
+      run: pnpm test # Add this step if you have tests
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: build-output
-        path: dist/ # Replace with your Webpack output directory
+        path: .output # Nuxt output directory
