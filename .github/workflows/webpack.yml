@@ -28,4 +28,4 @@ jobs:
       run: pnpm install
 
     - name: Build with webpack
-      run: pnpm run build
+      run: pnpm run build 
