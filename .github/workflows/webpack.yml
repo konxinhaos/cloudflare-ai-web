@@ -1,54 +1,41 @@
-name: NodeJS with Webpack
+name: Build and Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
-      fail-fast: false
+        node-version: [16, 18]
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'pnpm' # Enable pnpm caching
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
-    - name: Install pnpm
-      run: npm install -g pnpm@latest
+      - name: Install dependencies
+        run: pnpm install
 
-    - name: Verify pnpm installation
-      run: pnpm --version
+      - name: Build project
+        run: pnpm run build
 
-    - name: Cache pnpm modules
-      uses: actions/cache@v4
-      with:
-        path: ~/.pnpm-store
-        key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-        restore-keys: |
-          pnpm-store-${{ runner.os }}-
-
-    - name: Install dependencies
-      run: pnpm install
-
-    - name: Build with Nuxt
-      run: pnpm build
-
-    - name: Run tests (if applicable)
-      run: pnpm test # Add this step if you have tests
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-output
-        path: .output # Nuxt output directory
+      - name: Deploy to Vercel (if applicable)
+        if: github.ref == 'refs/heads/main'
+        uses: amondnet/github-action-vercel-deploy@v8
+        with:
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
