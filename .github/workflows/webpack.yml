@@ -1,43 +1,38 @@
-name: Build and Deploy
+name: NodeJS with Webpack
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [16, 18]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+    - name: Use Node.js ${{ matrix.node-version }} with pnpm
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        package-manager: pnpm
 
-      - name: Install dependencies
-        run: pnpm install
+    - name: Cache pnpm dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.pnpm-store
+        key: pnpm-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-cache-
 
-      - name: Build project
-        run: pnpm run build
+    - name: Install dependencies
+      run: pnpm install
 
-      - name: Deploy to Vercel
-        if: github.ref == 'refs/heads/main'
-        uses: vercel/vercel@latest
-        with:
-          token: ${{ secrets.VERCEL_TOKEN }}
-          orgId: ${{ secrets.VERCEL_ORG_ID }}
-          projectId: ${{ secrets.VERCEL_PROJECT_ID }}
-          buildOutput: dist  # 根据项目实际构建输出目录进行调整
+    - name: Build with webpack
+      run: pnpm run build
