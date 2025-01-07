@@ -33,9 +33,11 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-      - name: Deploy to Vercel (if applicable)
+      - name: Deploy to Vercel
         if: github.ref == 'refs/heads/main'
-        uses: amondnet/github-action-vercel-deploy@v8
+        uses: vercel/vercel@latest
         with:
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+          token: ${{ secrets.VERCEL_TOKEN }}
+          orgId: ${{ secrets.VERCEL_ORG_ID }}
+          projectId: ${{ secrets.VERCEL_PROJECT_ID }}
+          buildOutput: dist  # 根据项目实际构建输出目录进行调整
