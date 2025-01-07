@@ -20,4 +20,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: Kongin/cloudflare-ai-web:latest
+          tags: kongin/cloudflare-ai-web:latest
