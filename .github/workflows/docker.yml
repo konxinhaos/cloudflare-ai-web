@@ -1,24 +1,23 @@
-name: Docker Image Build and Publish
-
+name: docker
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build-and-publish:
-
+  docker:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push image
-        run: |
-          docker build -t $AWS_ECR_REPOSITORY_URI .
-          docker push $AWS_ECR_REPOSITORY_URI
-        env:
-          AWS_ECR_REPOSITORY_URI: your-ecr-repo-uri
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: jazee6/cloudflare-ai-web:latest
